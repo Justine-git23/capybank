@@ -1,0 +1,3 @@
+{% with m = get_flashed_messages(with_categories=true) %}{% for c,t in m %}
+<div role="alert" class="mb-4 rounded-xl px-4 py-3 text-sm font-medium {{ {'error':'bg-red-100 text-red-900','success':'bg-green-100 text-green-900','info':'bg-white text-pond'}[c] }}">{{ t }}</div>
+{% endfor %}{% endwith %}

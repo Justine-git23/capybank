@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Change PIN{% endblock %}
+{% block body %}
+<main class="min-h-screen flex items-center p-6">
+<form method="post" class="w-full max-w-sm mx-auto bg-white rounded-3xl p-8 shadow-sm">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <h1 class="font-display font-bold text-2xl mb-1">{{ 'Set your own PIN' if u.must_change_pin else 'Change PIN' }}</h1>
+  <p class="text-sm text-pond/60 mb-5">{{ 'Replace the default PIN before you continue.' if u.must_change_pin else ('Use 4 to 6 digits.' if u.role=='customer' else 'Use at least 8 characters.') }}</p>
+  {% include "_flash.html" %}
+  {% for n,l in [('current','Current PIN'),('new','New PIN'),('confirm','Confirm new PIN')] %}
+  <label class="block text-sm font-semibold mb-1" for="{{n}}">{{l}}</label>
+  <input id="{{n}}" name="{{n}}" type="password" required {% if u.role=='customer' %}inputmode="numeric" maxlength="6"{% endif %} class="w-full mb-4 rounded-xl border border-pond/20 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-capy">
+  {% endfor %}
+  <button class="w-full rounded-xl bg-capy text-white font-semibold py-3">Save PIN</button>
+  <div class="mt-4 flex justify-between text-sm"><a class="underline" href="{{ url_for('home') }}">Back</a><a class="underline" href="{{ url_for('logout') }}">Sign out</a></div>
+</form>
+</main>
+{% endblock %}

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: capybank
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PIN
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase: {name: capybank-db, property: connectionString}
+databases:
+  - name: capybank-db
+    plan: free

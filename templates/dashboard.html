@@ -1,0 +1,64 @@
+{% extends "base.html" %}{% block title %}My account{% endblock %}
+{% block body %}
+<header class="bg-pond text-white">
+  <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+    <span class="font-display font-bold text-lg flex items-center gap-2"><i data-lucide="waves"></i>{{ bank }}</span>
+    <nav class="flex items-center gap-4 text-sm"><a class="underline" href="{{ url_for('change_pin') }}">Change PIN</a><a class="underline" href="{{ url_for('logout') }}">Sign out</a></nav>
+  </div>
+</header>
+<main class="max-w-5xl mx-auto px-4 py-8 grid gap-6 lg:grid-cols-5">
+  <section class="lg:col-span-3 space-y-6">
+    <div class="rounded-3xl bg-pond text-white p-8">
+      <p class="text-white/70">Hello, {{ u.name }}</p>
+      <p class="font-display font-extrabold text-5xl mt-2" id="balance">{{ u.balance|peso }}</p>
+      <p class="mt-4 text-sm text-white/60 flex items-center gap-2"><i data-lucide="hash" class="w-4 h-4"></i>Account {{ u.account_no }}</p>
+    </div>
+    <div class="rounded-3xl bg-white p-6">
+      <h2 class="font-display font-bold text-xl mb-4">Recent activity</h2>
+      <div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead class="text-left text-pond/60"><tr><th class="py-2">When</th><th>Type</th><th>Ref</th><th class="text-right">Amount</th><th class="text-right">Balance</th></tr></thead>
+        <tbody id="rows">
+        {% for t in txns %}<tr class="border-t border-pond/10"><td class="py-2">{{ t.created_at|stamp }}</td><td class="capitalize">{{ t.kind }}</td><td>{{ t.ref }}</td><td class="text-right {{ 'text-reed' if t.kind=='deposit' else 'text-capy' }}">{{ '+' if t.kind=='deposit' else '-' }}{{ t.amount|peso }}</td><td class="text-right">{{ t.balance_after|peso }}</td></tr>{% endfor %}
+        </tbody></table>
+      <p id="empty" class="py-6 text-pond/60 {{ 'hidden' if txns }}">No transactions yet. Make a deposit to get started.</p></div>
+    </div>
+  </section>
+  <aside class="lg:col-span-2">
+    <form id="txn" class="rounded-3xl bg-white p-6 lg:sticky lg:top-6">
+      <h2 class="font-display font-bold text-xl mb-4">New transaction</h2>
+      <div id="msg" role="status" class="hidden mb-4 rounded-xl px-4 py-3 text-sm font-medium"></div>
+      <fieldset class="grid grid-cols-2 gap-2 mb-4">
+        <label class="cursor-pointer"><input type="radio" name="kind" value="deposit" checked class="peer sr-only"><span class="block text-center rounded-xl border border-pond/20 py-3 peer-checked:bg-reed peer-checked:text-white peer-focus-visible:ring-2 ring-capy">Deposit</span></label>
+        <label class="cursor-pointer"><input type="radio" name="kind" value="withdraw" class="peer sr-only"><span class="block text-center rounded-xl border border-pond/20 py-3 peer-checked:bg-capy peer-checked:text-white peer-focus-visible:ring-2 ring-capy">Withdraw</span></label>
+      </fieldset>
+      <label class="block text-sm font-semibold mb-1" for="amount">Amount (₱)</label>
+      <input id="amount" name="amount" type="number" step="0.01" min="0.01" required class="w-full mb-4 rounded-xl border border-pond/20 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-capy">
+      <label class="block text-sm font-semibold mb-1" for="pin">Confirm with your PIN</label>
+      <input id="pin" name="pin" type="password" inputmode="numeric" maxlength="6" required autocomplete="off" class="w-full mb-4 rounded-xl border border-pond/20 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-capy">
+      <label class="flex items-center gap-2 text-sm mb-5"><input type="checkbox" name="logout_after" checked class="accent-capy">Sign me out after this transaction</label>
+      <button id="go" class="w-full rounded-xl bg-capy text-white font-semibold py-3">Confirm transaction</button>
+      <p class="mt-4 text-xs text-pond/60">Limits: {{ per_txn|peso }} per transaction, {{ daily|peso }} withdrawn per day. Every transaction needs your PIN.</p>
+    </form>
+  </aside>
+</main>
+<script>
+const CSRF="{{ csrf }}",f=document.getElementById('txn'),msg=document.getElementById('msg');
+const show=(t,ok)=>{msg.textContent=t;msg.className='mb-4 rounded-xl px-4 py-3 text-sm font-medium '+(ok?'bg-green-100 text-green-900':'bg-red-100 text-red-900')};
+f.addEventListener('submit',async e=>{
+  e.preventDefault();const b=document.getElementById('go');b.disabled=true;
+  try{
+    const r=await fetch('/transact',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF':CSRF},
+      body:JSON.stringify({kind:f.kind.value,amount:f.amount.value,pin:f.pin.value,logout_after:f.logout_after.checked})});
+    const d=await r.json();f.pin.value='';
+    if(!d.ok){show(d.error,false);if(d.locked)setTimeout(()=>location.href='/login',2500);return}
+    document.getElementById('balance').textContent=d.balance;
+    document.getElementById('empty').classList.add('hidden');
+    const tr=document.createElement('tr');tr.className='border-t border-pond/10';
+    [d.when,d.kind,d.ref,(d.kind==='deposit'?'+':'-')+d.amount,d.balance].forEach((v,i)=>{const td=document.createElement('td');td.textContent=v;td.className=(i==0?'py-2 ':'')+(i==1?'capitalize ':'')+(i>2?'text-right':'');tr.appendChild(td)});
+    document.getElementById('rows').prepend(tr);f.amount.value='';
+    show(`Done. Receipt ${d.ref}: ${d.kind} of ${d.amount}.`+(d.logout?' Signing you out...':''),true);
+    if(d.logout)setTimeout(()=>location.href='/logout',2500);
+  }catch(err){show('Network problem. Check your connection and try again.',false)}finally{b.disabled=false}
+});
+</script>
+{% endblock %}

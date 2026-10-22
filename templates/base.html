@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ bank }} | {% block title %}Calm money{% endblock %}</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{pond:'#17302B',reed:'#5E7B4F',mist:'#E4ECE9',capy:'#9A6238',lily:'#F4C9B5'},fontFamily:{display:['"Bricolage Grotesque"','sans-serif'],sans:['Figtree','sans-serif']}}}}</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-mist text-pond font-sans min-h-screen antialiased">
+{% block body %}{% endblock %}
+<script>
+lucide.createIcons();
+{% if session.uid %}
+let idle; const kick=()=>{clearTimeout(idle);idle=setTimeout(()=>location.href='/logout?idle=1',5*60*1000)};
+['click','keydown','touchstart','mousemove'].forEach(e=>addEventListener(e,kick));kick();
+{% endif %}
+</script>
+</body>
+</html>

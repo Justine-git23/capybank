@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block title %}Sign in{% endblock %}
+{% block body %}
+<main class="min-h-screen grid lg:grid-cols-2">
+  <section class="bg-pond text-white p-8 lg:p-16 flex flex-col justify-between">
+    <div class="flex items-center gap-2 font-display font-bold text-xl"><i data-lucide="waves"></i>{{ bank }}</div>
+    <div class="py-16">
+      <h1 class="font-display font-extrabold text-6xl lg:text-8xl leading-none tracking-tight">Calm money.<br>Zero rush.</h1>
+      <p class="mt-6 text-lg text-white/75 max-w-md">The bank of the world's chillest rodent. Deposit, withdraw and check your balance without breaking a sweat.</p>
+    </div>
+    <p class="text-sm text-white/50">Simulation only. No real money involved.</p>
+  </section>
+  <section class="p-6 lg:p-16 flex items-center">
+    <form method="post" class="w-full max-w-sm mx-auto">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <h2 class="font-display font-bold text-3xl mb-6">Sign in</h2>
+      {% include "_flash.html" %}
+      <label class="block text-sm font-semibold mb-1" for="account">Account number</label>
+      <input id="account" name="account" required autocomplete="username" inputmode="numeric" class="w-full mb-4 rounded-xl border border-pond/20 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-capy">
+      <label class="block text-sm font-semibold mb-1" for="pin">PIN</label>
+      <input id="pin" name="pin" type="password" required autocomplete="current-password" class="w-full mb-6 rounded-xl border border-pond/20 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-capy">
+      <button class="w-full rounded-xl bg-capy hover:bg-capy/90 text-white font-semibold py-3 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pond">Sign in</button>
+      <p class="mt-4 text-sm text-pond/60">Need an account? Ask the bank admin to create one for you. Three wrong PINs lock your account.</p>
+    </form>
+  </section>
+</main>
+{% endblock %}
